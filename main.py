@@ -68,3 +68,53 @@ print("Encoding and decoding a text:")
 print("Encoded:", ids)
 print("Decoded:", tokenizer.decode(ids))
 print()
+
+# Add special tokens
+all_tokens = sorted(list(set(preprocessed)))
+all_tokens.extend(["<|endoftext|>","<|unk|>"])
+
+vocab = {word: index for index, word in enumerate(all_tokens)}
+
+vocab_size = len(all_tokens)
+
+print(f"Vocabulary size: {vocab_size}")
+print()
+
+for i, item in enumerate(list(vocab.items())[-5:]):
+    print(item)
+
+print()
+
+# Create a new tokenizer class
+
+class SimpleTokenizerV2:
+    def __init__(self, vocab):
+        self.str_to_int = vocab
+        self.int_to_str = {index: word for word, index in vocab.items()}
+
+    def encode(self, text):
+        preprocessed = re.split(r'([,.?_!"()\']|--|\s)', text)
+        preprocessed = [item.strip() for item in preprocessed if item.strip()]
+        preprocessed = [item if item in self.str_to_int else "<|unk|>" for item in preprocessed]
+
+        ids = [self.str_to_int[word] for word in preprocessed]
+        return ids
+    
+    def decode(self, ids):
+        text = " ".join([self.int_to_str[id] for id in ids])
+        
+        text = re.sub(r'\s+([,.?!"()\'])', r'\1', text)
+        return text
+    
+
+text1 = "Hello, do you like tea?"
+text2 = "In the sunlit terraces of the palace."
+text = " <|endoftext|> ".join([text1, text2])
+print("Text:", text)
+print()
+tokenizer = SimpleTokenizerV2(vocab)
+print("Encoded:", tokenizer.encode(text))
+print()
+print("Decoded:", tokenizer.decode(tokenizer.encode(text)))
+print()
+

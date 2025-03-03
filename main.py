@@ -98,3 +98,88 @@ inputs, targets = next(data_iter)
 print("Inputs:\n ", inputs)
 print("Targets:\n ", targets)
 print()
+
+# Create embeddings
+
+inputs_ids = torch.tensor([2, 3, 5, 1])
+vocab_size = 6
+output_dim = 3
+
+torch.manual_seed(123) # Set the seed for reproducibility
+
+embeddings = torch.nn.Embedding(vocab_size, output_dim) # Create the embeddings layer
+
+print("Embeddings weights: \n", embeddings.weight) # Print the weights of the embeddings layer
+print()
+
+print("Embeddings of the inputs: \n", embeddings(inputs_ids)) # Print the embeddings of the inputs
+print()
+
+output_dim = 256
+vocab_size = 50257 # The vocabulary size of the tokenizer
+token_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)
+
+print("Token embedding layer: \n", token_embedding_layer)
+print()
+
+batch_size = 8
+max_length = 4
+dataloader = create_dataloader_v1(
+    raw_text, batch_size=batch_size, max_length=max_length,
+    stride=max_length, shuffle=False
+)
+data_iter = iter(dataloader)
+inputs, targets = next(data_iter)
+
+print("Token IDs: \n", inputs)
+print()
+
+print("Inputs shape: \n", inputs.shape)
+print()
+
+# Create the embeddings
+embeddings = token_embedding_layer(inputs)
+print("Embeddings: \n", embeddings)
+print()
+
+# Number of tokens in the batch (Items), number of tokens in the sequence (Rows), embedding dimension (Columns)
+print("Embeddings shape: \n", embeddings.shape) 
+print()
+
+# Position embeddings
+context_length = max_length
+pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
+pos_embeddings = pos_embedding_layer(torch.arange(context_length))
+print("Positional embeddings: \n", pos_embeddings)
+print()
+
+print("Positional embeddings shape: \n", pos_embeddings.shape)
+print()
+
+# Add the positional embeddings to the token embeddings
+embeddings_with_pos = embeddings + pos_embeddings
+print("Embeddings with positional embeddings: \n", embeddings_with_pos.shape)
+print()
+
+# Create a simple transformer block
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

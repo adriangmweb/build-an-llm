@@ -2,7 +2,7 @@
 # This one will contain the queries, keys, and values trainable matrices
 
 import torch
-
+from self_attention_class import SelfAttention_v1, SelfAttention_v2
 inputs = torch.tensor(
 [[0.43, 0.15, 0.89], # Your (x^1)
  [0.55, 0.87, 0.66], # journey (x^2)
@@ -57,3 +57,15 @@ context_vector = attention_weights @ values
 print("Context vector: \n", context_vector)
 print()
 
+# Compute the context vector using the class
+torch.manual_seed(123)
+self_attention = SelfAttention_v1(d_in, d_out)
+context_vector = self_attention(inputs)
+print("Context vector using the class: \n", context_vector)
+print()
+
+# Compute the context vector using the second class
+torch.manual_seed(789)
+self_attention = SelfAttention_v2(d_in, d_out)
+context_vector = self_attention(inputs)
+print("Context vector using the second class: \n", context_vector)

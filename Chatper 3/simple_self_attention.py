@@ -1,3 +1,6 @@
+# Simple self-attention mechanism
+# This one won't be trainable but to understand the mechanism
+
 import torch
 
 # Example computing the context vector for the query "journey"

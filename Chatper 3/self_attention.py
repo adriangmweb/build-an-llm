@@ -3,6 +3,8 @@
 
 import torch
 from self_attention_class import SelfAttention_v1, SelfAttention_v2
+from causal_attention_class import CausalAttention
+
 inputs = torch.tensor(
 [[0.43, 0.15, 0.89], # Your (x^1)
  [0.55, 0.87, 0.66], # journey (x^2)
@@ -137,7 +139,20 @@ attention_weights_masked = dropout(attention_weights_masked)
 print("Attention weights after masking with dropout: \n", attention_weights_masked)
 print()
 
-# Multi-head attention
-# We can have multiple attention heads
-# Each head will have its own query, key, and value matrices
+# Duplicate the input text to ensure the code can handle batches
+# Of more than one input
+
+batch = torch.stack([inputs, inputs], dim=0)
+print("Shape of the batch: \n", batch.shape)
+print()
+
+print("***** Causal attention: ***** \n")
+# Use the causal attention class
+torch.manual_seed(123) # Set the seed for reproducibility
+
+context_length = batch.shape[1]
+causal_attention = CausalAttention(d_in, d_out, context_length, 0.0)
+context_vector = causal_attention(batch)
+print("Context vector shape for the batch: \n", context_vector.shape)
+print()
 

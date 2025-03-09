@@ -60,7 +60,3 @@ print()
 
 print("Context vector for journey (position 1): \n", context_vec[1])
 print()
-
-
-
-

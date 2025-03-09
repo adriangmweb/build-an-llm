@@ -160,26 +160,3 @@ print()
 embeddings_with_pos = embeddings + pos_embeddings
 print("Embeddings with positional embeddings: \n", embeddings_with_pos.shape)
 print()
-
-# Create a simple transformer block
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

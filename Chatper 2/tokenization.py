@@ -134,5 +134,3 @@ print()
 decoded = tokenizer.decode(encoded)
 print("Decoded:", decoded)
 print()
-
-

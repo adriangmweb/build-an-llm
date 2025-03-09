@@ -4,6 +4,7 @@
 import torch
 from self_attention_class import SelfAttention_v1, SelfAttention_v2
 from causal_attention_class import CausalAttention
+from multi_head_attention import MultiHeadAttentionWrapper, MultiHeadAttention
 
 inputs = torch.tensor(
 [[0.43, 0.15, 0.89], # Your (x^1)
@@ -142,7 +143,7 @@ print()
 # Duplicate the input text to ensure the code can handle batches
 # Of more than one input
 
-batch = torch.stack([inputs, inputs], dim=0)
+batch = torch.stack([inputs, inputs], dim=0) # Stack the inputs twice to create a batch
 print("Shape of the batch: \n", batch.shape)
 print()
 
@@ -153,6 +154,44 @@ torch.manual_seed(123) # Set the seed for reproducibility
 context_length = batch.shape[1]
 causal_attention = CausalAttention(d_in, d_out, context_length, 0.0)
 context_vector = causal_attention(batch)
+
+print("Context vector: \n", context_vector)
+print()
+print("Context vector shape for the batch: \n", context_vector.shape)
+print()
+
+print("***** Multi-head attention with wrapper: ***** \n")
+
+# Use the multi-head attention class
+torch.manual_seed(123)
+
+context_length = batch.shape[1] # Number of tokens in the batch: 6
+d_in, d_out, num_heads = 3, 2, 2
+multi_head_attention = MultiHeadAttentionWrapper(d_in, d_out, num_heads, 
+                                                 context_length, dropout=0.0)
+context_vector = multi_head_attention(batch)
+
+# Context vector is (2, 6, 4)
+# First dimension is 2: is the number of batches, we are duplicating the input so they are identical
+# Second dimension is 6: is the number of tokens in the batch
+# Third dimension is 4 (2 * 2): is the number of dimensions in the output
+# 4 = 2 (d_out) * 2 (num_heads)
+print("Context vector: \n", context_vector)
+print()
+print("Context vector shape for the batch: \n", context_vector.shape)
+print()
+
+print("***** Multi-head attention: ***** \n")
+
+# Use the multi-head attention class
+torch.manual_seed(123)
+batch_size, context_length, d_in = batch.shape
+d_out, num_heads = 2, 2
+multi_head_attention = MultiHeadAttention(d_in, d_out, num_heads, context_length, dropout=0.0)
+context_vector = multi_head_attention(batch)
+
+print("Context vector: \n", context_vector)
+print()
 print("Context vector shape for the batch: \n", context_vector.shape)
 print()
 

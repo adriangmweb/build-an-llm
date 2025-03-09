@@ -18,7 +18,7 @@ class CausalAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.register_buffer(
             "mask",
-            torch.tril(torch.ones(context_length, context_length),
+            torch.triu(torch.ones(context_length, context_length),
                        diagonal=1)
         )
         

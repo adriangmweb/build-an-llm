@@ -69,3 +69,46 @@ torch.manual_seed(789)
 self_attention = SelfAttention_v2(d_in, d_out)
 context_vector = self_attention(inputs)
 print("Context vector using the second class: \n", context_vector)
+print()
+
+# Masked self-attention
+# We want to mask the future tokens so that the model cannot see the future tokens
+# This is to prevent the model from cheating
+print("***** Masked self-attention: ***** \n")
+
+queries = self_attention.W_Query(inputs)
+keys = self_attention.W_Key(inputs)
+attention_scores = queries @ keys.T
+attention_weights = torch.softmax(attention_scores / keys.shape[-1]**0.5, dim=-1)
+print("Attention weights: \n", attention_weights)
+print()
+
+# Create a simple mask
+
+context_length = attention_scores.shape[0]
+mask_simple = torch.tril(torch.ones(context_length, context_length))
+print("Simple mask: \n", mask_simple)
+print()
+
+# Apply the mask to the attention weights to zero out the future tokens
+attention_weights_masked = attention_weights * mask_simple
+print("Attention weights after masking: \n", attention_weights_masked)
+print()
+
+# Normalize the attention weights to sum to 1
+row_sums = attention_weights_masked.sum(dim=-1, keepdim=True)
+attention_weights_masked = attention_weights_masked / row_sums
+print("Attention weights after normalization: \n", attention_weights_masked)
+print()
+
+# More efficient masked self-attention
+# We can mask the future tokens setting the attention weights to -inf
+mask = torch.triu(torch.ones(context_length, context_length), diagonal=1)
+masked_attention_scores = attention_scores.masked_fill(mask.bool(), -torch.inf)
+print("Masked attention scores to -inf: \n", masked_attention_scores)
+print()
+
+# Softmax the masked attention scores
+attention_weights_masked = torch.softmax(masked_attention_scores / d_k**0.5, dim=-1)
+print("Attention weights after masking with softmax: \n", attention_weights_masked)
+print()

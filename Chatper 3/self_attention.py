@@ -112,3 +112,32 @@ print()
 attention_weights_masked = torch.softmax(masked_attention_scores / d_k**0.5, dim=-1)
 print("Attention weights after masking with softmax: \n", attention_weights_masked)
 print()
+
+# Masking additional attention weights with dropout
+# Dropout is a regularization technique that randomly drops out some neurons in the network
+# This helps prevent overfitting
+# It only applies to training
+# It's usually applied after calculating the attention scores 
+# or after computing the attention weights
+# We'll apply it after computing the attention weights
+
+torch.manual_seed(123)
+dropout = torch.nn.Dropout(0.5) # 50% of the neurons will be dropped out
+example = torch.ones(6, 6)
+print("Example for a 50% dropout: \n", dropout(example))
+print()
+
+# Apply the dropout to the attention weights
+# Values will compensate for the dropped out neurons
+# Scaling their values by the inverse of the dropout rate
+# In this case, 1 / 0.5 = 2
+# So, the values will be scaled by 2
+torch.manual_seed(123)
+attention_weights_masked = dropout(attention_weights_masked)
+print("Attention weights after masking with dropout: \n", attention_weights_masked)
+print()
+
+# Multi-head attention
+# We can have multiple attention heads
+# Each head will have its own query, key, and value matrices
+

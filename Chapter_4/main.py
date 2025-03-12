@@ -1,7 +1,7 @@
 # Tokenize the text file
 import tiktoken
 import torch
-from Chapter_4.gpt2_dummy_model import DummyGPTModel
+from gpt2_dummy_model import DummyGPTModel
 
 tokenizer = tiktoken.get_encoding("gpt2")
 

@@ -2,7 +2,9 @@
 import tiktoken
 import torch
 from gpt2_dummy_model import DummyGPTModel
-
+import torch.nn as nn
+from layer_norm_class import LayerNorm
+from feed_forward_class import FeedForward
 tokenizer = tiktoken.get_encoding("gpt2")
 
 batch = []
@@ -36,3 +38,48 @@ model = DummyGPTModel(GPT_CONFIG_124M)
 logits = model(batch)
 print("Logits shape: \n", logits.shape)
 print("Logits: \n", logits)
+print()
+
+print("**** Normalization **** \n")
+
+torch.manual_seed(123)
+batch_example = torch.randn(2, 5) # 2 samples of 5 dimensions
+layer_norm = nn.Sequential(nn.Linear(5, 6), nn.ReLU())
+out = layer_norm(batch_example)
+print("Output: \n", out)
+
+mean = out.mean(dim=-1, keepdim=True) # dim=-1 calculates the mean horizontally
+var = out.var(dim=-1, keepdim=True)
+print("Mean: \n", mean)
+print("Variance: \n", var)
+print()
+
+# Apply the normalization formula
+# (out - mean) / sqrt(var)
+
+out_norm = (out - mean) / torch.sqrt(var)
+mean = out_norm.mean(dim=-1, keepdim=True)
+var = out_norm.var(dim=-1, keepdim=True)
+torch.set_printoptions(sci_mode=False)
+print("Normalized LayerOutput: \n", out_norm)
+print("Normalized Mean: \n", mean)
+print("Normalized Variance: \n", var)
+print()
+
+print("**** Use LayerNorm class **** \n")
+
+layer_norm = LayerNorm(emb_dim=5)
+out_ln = layer_norm(batch_example)
+mean_ln = out_ln.mean(dim=-1, keepdim=True)
+var_ln = out_ln.var(dim=-1, keepdim=True, unbiased=False)
+print("Mean: \n", mean_ln)
+print("Variance: \n", var_ln)
+print()
+
+print("**** Use FeedForward class **** \n")
+
+feed_forward = FeedForward(config=GPT_CONFIG_124M)
+x = torch.rand(2, 3, 768)
+out_ff = feed_forward(x)
+print("FeedForward output shape: \n", out_ff.shape)
+

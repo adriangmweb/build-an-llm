@@ -1,7 +1,7 @@
 # Tokenize the text file
 import tiktoken
 import torch
-from gpt2_models import DummyGPTModel
+from gpt2_models import DummyGPTModel, GPTModel
 import torch.nn as nn
 from layer_norm_class import LayerNorm
 from feed_forward_class import FeedForward
@@ -115,3 +115,46 @@ output = model(x)
 print("Input shape: \n", x.shape)
 print("TransformerBlock output shape: \n", output.shape)
 print()
+
+print("**** Use the final GPTModel class **** \n")
+
+torch.manual_seed(123)
+gpt_model = GPTModel(GPT_CONFIG_124M)
+
+output = gpt_model(batch)
+print("Input batch: \n", batch)
+print("Output shape: \n", output.shape)
+print("Output: \n", output)
+print()
+
+total_params = sum(p.numel() for p in gpt_model.parameters())
+print(f"Total number of parameters: {total_params:,} \n")
+
+# We are seeing more than 124M parameters due to weight tying
+# Which means that the model is reusing the weights of the embedding layer
+# and the output layer
+
+# We can see that the weights of the embedding layer and the output layer
+# are the same
+
+print("Token embedding layer shape: \n", gpt_model.tok_emb.weight.shape)
+print("Output layer shape: \n", gpt_model.out_head.weight.shape)
+print()
+
+# Let's try removing the output layer parameter count
+total_params_without_output = (
+    total_params - sum(p.numel() 
+                       for p in gpt_model.out_head.parameters()
+                       )
+)
+
+# Now it matches the 124M parameters of the original GPT-2 124M model
+print(f"Total number of parameters without output layer: {total_params_without_output:,} \n")
+print()
+
+# Compute the memory requirements for the 163M parameters
+total_size_bytes = total_params * 4 # 4 bytes per parameter (float32)
+total_size_mb = total_size_bytes / (1024 * 1024) # Convert to MB
+print(f"Total size of the model: {total_size_mb:.2f} MB \n")
+print()
+

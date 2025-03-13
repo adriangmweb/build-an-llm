@@ -88,3 +88,20 @@ class GPTModel(nn.Module):
 
         return logits
         
+def generate_text_simple(model, idx, # idx is (batch_size, context_size) array of token indices
+                         max_new_tokens, context_size):
+    for _ in range(max_new_tokens):
+        idx_cond = idx[:, -context_size:]
+        with torch.no_grad():
+            logits = model(idx_cond)
+
+        # logits is (batch_size, 1, vocab_size) array of logits
+        # we want to get the logits for the last token
+        logits = logits[:, -1, :] # (batch_size, vocab_size)
+        probs = torch.softmax(logits, dim=-1) # (batch_size, vocab_size)
+        idx_next = torch.argmax(probs, dim=-1, keepdim=True) # (batch_size, 1)
+        idx = torch.cat((idx, idx_next), dim=-1) # (batch_size, context_size + 1)
+
+    return idx
+
+    

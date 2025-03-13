@@ -1,7 +1,7 @@
 # Tokenize the text file
 import tiktoken
 import torch
-from gpt2_models import DummyGPTModel, GPTModel
+from gpt2_models import DummyGPTModel, GPTModel, generate_text_simple
 import torch.nn as nn
 from layer_norm_class import LayerNorm
 from feed_forward_class import FeedForward
@@ -158,3 +158,28 @@ total_size_mb = total_size_bytes / (1024 * 1024) # Convert to MB
 print(f"Total size of the model: {total_size_mb:.2f} MB \n")
 print()
 
+print("**** Generate Text **** \n")
+
+# First using the simple text generation function
+start_context = "Hello, I am"
+encoded = tokenizer.encode(start_context)
+print("Encoded: \n", encoded)
+encoded_tensor = torch.tensor(encoded).unsqueeze(0) # add batch dimension
+print("Encoded tensor shape: \n", encoded_tensor.shape)
+print()
+
+gpt_model.eval() # Disables random components like dropout as we are not training
+
+output = generate_text_simple(
+    model=gpt_model, 
+    idx=encoded_tensor, 
+    max_new_tokens=6, 
+    context_size=GPT_CONFIG_124M["context_length"]
+)
+print("Output: \n", output)
+print("Output length: \n", len(output[0]))
+print()
+
+decoded_text = tokenizer.decode(output.squeeze(0).tolist())
+print("Decoded text without training: \n", decoded_text)
+print()

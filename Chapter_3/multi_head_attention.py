@@ -5,7 +5,7 @@
 
 import torch
 import torch.nn as nn
-from causal_attention_class import CausalAttention
+from .causal_attention_class import CausalAttention
 
 # This class is a wrapper that stacks multiple causal attention modules
 # Example: 2 heads, 2 dimensions per head -> 4 dimensions in total: (d_out*num_heads = 4)

@@ -13,6 +13,58 @@ from layer_norm_class import LayerNorm
 from feed_forward_class import FeedForward
 from Chapter_3.multi_head_attention import MultiHeadAttention
 
+# Transformer Block Structure Diagram
+#
+#                          [INPUT]
+#                             │
+#              ┌──────────────┴──────────────┐
+#              │                             │
+#              ▼                             │
+#        [LAYER NORM 1]                      │
+#              │                             │
+#              ▼                             │
+#    [MULTI-HEAD ATTENTION]                  │
+#              │                             │
+#              ▼                             │
+#         [DROPOUT]                          │
+#              │                             │
+#              ▼                             │
+#             ADD ◄─────────────────────────┘
+#              │
+#              │
+#              ▼
+#        [LAYER NORM 2]                      
+#              │                             
+#              ▼                             
+#      [FEED FORWARD]                  
+#              │                             
+#              ▼                             
+#         [DROPOUT]                          
+#              │                             
+#              ▼                             
+#             ADD ◄─────────────────────────┐
+#              │                            │
+#              └────────────────────────────┘
+#              
+# The transformer block consists of two sub-blocks:
+#
+# 1. Multi-Head Attention Block:
+#    • First normalizes input through LayerNorm
+#    • Processes through multi-head self attention
+#    • Applies dropout for regularization
+#    • Adds original input as residual connection
+#
+# 2. Feed Forward Block:
+#    • Again normalizes through LayerNorm
+#    • Processes through feed forward network
+#    • Applies dropout for regularization
+#    • Adds previous output as residual connection
+#
+# This architecture helps with:
+# - Gradient flow (through residual connections)
+# - Training stability (through pre-normalization)
+# - Feature refinement (through dual processing blocks)
+
 class TransformerBlock(nn.Module):
     def __init__(self, config):
         super().__init__()

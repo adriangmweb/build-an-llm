@@ -1,7 +1,7 @@
 # Tokenize the text file
 import tiktoken
 import torch
-from gpt2_dummy_model import DummyGPTModel
+from gpt2_models import DummyGPTModel
 import torch.nn as nn
 from layer_norm_class import LayerNorm
 from feed_forward_class import FeedForward

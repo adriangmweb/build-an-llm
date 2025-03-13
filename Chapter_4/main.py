@@ -6,7 +6,7 @@ import torch.nn as nn
 from layer_norm_class import LayerNorm
 from feed_forward_class import FeedForward
 from shortcut_connections import ExampleDeepNeuralNetwork, print_gradients
-
+from transformer_block import TransformerBlock
 
 tokenizer = tiktoken.get_encoding("gpt2")
 
@@ -104,4 +104,14 @@ model_with_shortcut = ExampleDeepNeuralNetwork(layer_sizes, use_skip_connections
 print_gradients(model_with_shortcut, sample_input)
 print()
 
+print("**** Use TransformerBlock class **** \n")
 
+torch.manual_seed(123)
+config = GPT_CONFIG_124M
+x = torch.randn(2, 4, 768)
+
+model = TransformerBlock(config)
+output = model(x)
+print("Input shape: \n", x.shape)
+print("TransformerBlock output shape: \n", output.shape)
+print()

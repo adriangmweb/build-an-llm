@@ -5,6 +5,9 @@ from gpt2_dummy_model import DummyGPTModel
 import torch.nn as nn
 from layer_norm_class import LayerNorm
 from feed_forward_class import FeedForward
+from shortcut_connections import ExampleDeepNeuralNetwork, print_gradients
+
+
 tokenizer = tiktoken.get_encoding("gpt2")
 
 batch = []
@@ -82,4 +85,23 @@ feed_forward = FeedForward(config=GPT_CONFIG_124M)
 x = torch.rand(2, 3, 768)
 out_ff = feed_forward(x)
 print("FeedForward output shape: \n", out_ff.shape)
+print()
+
+print("**** Use Shortcut Connections **** \n")
+
+layer_sizes = [3, 3, 3, 3, 3, 1]
+sample_input = torch.tensor([[1., 0., -1.]])
+
+print("Without shortcut connections, gradient gets smaller <vanishing gradient problem>: \n")
+torch.manual_seed(123)
+model_without_shortcut = ExampleDeepNeuralNetwork(layer_sizes, use_skip_connections=False)
+print_gradients(model_without_shortcut, sample_input)
+print()
+
+print("With shortcut connections, gradient is more stable: \n")
+torch.manual_seed(123)
+model_with_shortcut = ExampleDeepNeuralNetwork(layer_sizes, use_skip_connections=True)
+print_gradients(model_with_shortcut, sample_input)
+print()
+
 

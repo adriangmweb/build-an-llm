@@ -49,8 +49,8 @@ class DummyLayerNorm(nn.Module):
     def forward(self, x):
         return x
     
-from transformer_block import TransformerBlock
-from layer_norm_class import LayerNorm
+from Chapter_4.transformer_block import TransformerBlock
+from Chapter_4.layer_norm_class import LayerNorm
 # Create the GPT final model
 class GPTModel(nn.Module):
     def __init__(self, config):

@@ -9,8 +9,8 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch.nn as nn
-from layer_norm_class import LayerNorm
-from feed_forward_class import FeedForward
+from Chapter_4.layer_norm_class import LayerNorm
+from Chapter_4.feed_forward_class import FeedForward
 from Chapter_3.multi_head_attention import MultiHeadAttention
 
 # Transformer Block Structure Diagram

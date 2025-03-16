@@ -10,8 +10,10 @@ This educational project aims to provide hands-on experience in building and und
 
 The project currently contains:
 
-- `main.py`: A basic script that reads and analyzes text data
-- `the-veredict.txt`: A sample text file used for testing and development
+- Chapter 2: Tokenization and embeddings
+- Chapter 3: Attention mechanisms and transformers
+- Chapter 4: Building a GPT model from scratch
+- Chapter 5: Training and fine-tuning LLMs
 
 ## Prerequisites
 

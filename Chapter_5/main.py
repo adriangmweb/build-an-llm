@@ -47,6 +47,69 @@ print("Untrained model output: \n")
 print(token_ids_to_text(token_ids, tokenizer))
 print()
 
-# Now let's train the model
+# Inputs and targets example
 
+inputs = torch.tensor([[16833, 3626, 6100], # "Every effort moves"
+                        [40, 1107, 588]]) # "I really like"
 
+targets = torch.tensor([[3626, 6100, 345], # "effort moves you"
+                        [1107, 588, 11311]]) # "really like chocolate"
+
+with torch.no_grad(): # Disables gradient calculation as we are not training
+    logits = model(inputs)
+probabilities = torch.softmax(logits, dim=-1)
+
+print("Probabilities shape: \n", probabilities.shape)
+print()
+
+token_ids = torch.argmax(probabilities, dim=-1, keepdim=True)
+print("Token IDs: \n", token_ids)
+print()
+
+print(f"Targets batch 1: {token_ids_to_text(targets[0], tokenizer)}")
+print(f"Output batch 1: {token_ids_to_text(token_ids[0].flatten(), tokenizer)}")
+print()
+
+# Target probabilities
+
+text_idx = 0
+target_probabilities_1 = probabilities[text_idx, [0, 1, 2], targets[text_idx]] # Get the probabilities of the target tokens
+print("Target probabilities batch 1: \n", target_probabilities_1)
+print()
+
+text_idx = 1
+target_probabilities_2 = probabilities[text_idx, [0, 1, 2], targets[text_idx]] # Get the probabilities of the target tokens
+print("Target probabilities batch 2: \n", target_probabilities_2)
+print()
+
+log_probabilities = torch.log(torch.cat([target_probabilities_1, target_probabilities_2])) # Concatenate the probabilities
+print("Log probabilities: \n", log_probabilities)
+print()
+
+average_log_probability = torch.mean(log_probabilities)
+print(f"Average log probability: {average_log_probability.item():.4f}")
+print()
+
+negative_average_log_probability = average_log_probability * -1
+print(f"Negative average log probability: {negative_average_log_probability.item():.4f}")
+print()
+
+print("Logits shape: \n", logits.shape)
+print("Targets shape: \n", targets.shape)
+print()
+
+# Flatten the logits and targets for the loss computation
+
+logits_flat = logits.flatten(0, 1) # Flatens the batch and sequence dimensions (batch_size * seq_len, vocab_size)
+targets_flat = targets.flatten() # Flatens the batch dimension (batch_size * seq_len)
+
+print("Logits flattened shape: \n", logits_flat.shape)
+print("Targets flattened shape: \n", targets_flat.shape)
+print()
+
+# Compute the loss
+
+print("Computing the loss with cross entropy facilitates the computation of the logits and targets")
+loss = torch.nn.functional.cross_entropy(logits_flat, targets_flat)
+print(f"Loss: {loss.item():.4f}")
+print()

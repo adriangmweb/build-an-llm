@@ -113,3 +113,73 @@ print("Computing the loss with cross entropy facilitates the computation of the 
 loss = torch.nn.functional.cross_entropy(logits_flat, targets_flat)
 print(f"Loss: {loss.item():.4f}")
 print()
+
+# Preparing the data for training
+
+# Load the dataset
+
+print("***** Loading the dataset *****")
+
+filepath = os.path.join(os.path.dirname(__file__), "..", "the-veredict.txt")
+with open(filepath, "r", encoding="utf-8") as file:
+    text_data = file.read()
+
+total_characters = len(text_data)
+total_tokens = len(tokenizer.encode(text_data))
+
+print(f"Total characters: {total_characters}")
+print(f"Total tokens: {total_tokens}")
+print()
+
+train_ratio = 0.9 # 90% of the data will be used for training
+split_idx = int(train_ratio * len(text_data)) # Split 10% of the data for validation
+
+train_data = text_data[:split_idx]
+val_data = text_data[split_idx:]
+
+print(f"Train size: {len(train_data)}")
+print(f"Validation size: {len(val_data)}")
+print()
+
+from Chapter_2.embeddings import create_dataloader_v1
+
+torch.manual_seed(123)
+
+train_loader = create_dataloader_v1(
+    train_data,
+    batch_size=2,
+    max_length=GPT_CONFIG_124M["context_length"],
+    stride=GPT_CONFIG_124M["context_length"],
+    drop_last=True, # Drop the last batch if it's not full
+    shuffle=True, # Shuffle the data
+)
+val_loader = create_dataloader_v1(
+    val_data,
+    batch_size=2,
+    max_length=GPT_CONFIG_124M["context_length"],
+    stride=GPT_CONFIG_124M["context_length"],
+    drop_last=False, # Don't drop the last batch
+    shuffle=False,
+)
+
+# Iterate over the training data to see their shape
+
+for batch_idx, (inputs, targets) in enumerate(train_loader):
+    print(f"Batch {batch_idx + 1}")
+    print("Inputs shape: \n", inputs.shape)
+    print("Targets shape: \n", targets.shape)
+    print()
+    break
+
+from training_functions import calculate_loss_loader
+
+device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+model.to(device)
+
+with torch.no_grad():
+    train_loss = calculate_loss_loader(train_loader, model, device)
+    val_loss = calculate_loss_loader(val_loader, model, device)
+
+print(f"Train loss: {train_loss}")
+print(f"Validation loss: {val_loss}")
+print()

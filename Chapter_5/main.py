@@ -176,5 +176,67 @@ print(f"Train loss: {train_loss}")
 print(f"Validation loss: {val_loss}")
 print()
 
+print("***** Training the model with simple training *****")
+
+from training_functions import train_model_simple
+
+torch.manual_seed(123)
+model = GPTModel(GPT_CONFIG_124M)
+model.to(device)
+
+optimizer = torch.optim.AdamW(
+    model.parameters(), # All trainable weights
+    lr=0.0004, # Learning rate
+    weight_decay=0.1 # L2 regularization
+)
+
+num_epochs = 10
+train_losses, val_losses, track_tokens_seen = train_model_simple(
+    model, train_loader, val_loader, optimizer, device, num_epochs,
+    eval_freq=5, # Evaluate every 5 epochs
+    eval_iter=5, # Evaluate every 5 batches
+    start_context="Every effort moves you",
+    tokenizer=tokenizer
+)
+
+epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
+
+# We can see that the validation loss is higher than the training loss, which means that the model is overfitting
+# We can also see that the model is learning faster in the beginning
+# plot_losses(epochs_tensor, track_tokens_seen, train_losses, val_losses) # Uncomment to plot the losses
+    
 model.to("cpu") # Move the model to the CPU as the dataset is too small
 model.eval()
+
+print("***** Temperature scaling ***** \n")
+
+model.to("cpu") # Move the model to the CPU as the dataset is too small
+model.eval()
+
+token_ids = generate_text_simple(
+    model,
+    idx=text_to_token_ids("every effort moves you", tokenizer),
+    max_new_tokens=25,
+    context_size=GPT_CONFIG_124M["context_length"]
+)
+
+print("No temperature scaling model output: \n")
+print(token_ids_to_text(token_ids, tokenizer))
+print()
+
+from temperature_scaling import generate
+
+torch.manual_seed(123)
+token_ids = generate(
+    model,
+    idx=text_to_token_ids("every effort moves you", tokenizer),
+    max_new_tokens=15,
+    context_size=GPT_CONFIG_124M["context_length"],
+    top_k=25,
+    temperature=1.4
+)
+
+print("Temperature scaled model output: \n")
+print(token_ids_to_text(token_ids, tokenizer))
+print()
+

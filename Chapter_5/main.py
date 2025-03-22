@@ -176,32 +176,5 @@ print(f"Train loss: {train_loss}")
 print(f"Validation loss: {val_loss}")
 print()
 
-print("***** Training the model with simple training *****")
-
-from training_functions import train_model_simple
-
-torch.manual_seed(123)
-model = GPTModel(GPT_CONFIG_124M)
-model.to(device)
-
-optimizer = torch.optim.AdamW(
-    model.parameters(), # All trainable weights
-    lr=0.0004, # Learning rate
-    weight_decay=0.1 # L2 regularization
-)
-
-num_epochs = 10
-train_losses, val_losses, track_tokens_seen = train_model_simple(
-    model, train_loader, val_loader, optimizer, device, num_epochs,
-    eval_freq=5, # Evaluate every 5 epochs
-    eval_iter=5, # Evaluate every 5 batches
-    start_context="Every effort moves you",
-    tokenizer=tokenizer
-)
-
-epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
-
-# We can see that the validation loss is higher than the training loss, which means that the model is overfitting
-# We can also see that the model is learning faster in the beginning
-# plot_losses(epochs_tensor, track_tokens_seen, train_losses, val_losses) # Uncomment to plot the losses
-    
+model.to("cpu") # Move the model to the CPU as the dataset is too small
+model.eval()

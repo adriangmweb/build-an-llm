@@ -7,6 +7,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from Chapter_4.gpt2_models import GPTModel, generate_text_simple
+from text2tokens import text_to_token_ids, token_ids_to_text
 
 GPT_CONFIG_124M = {
     "vocab_size": 50257,
@@ -21,17 +22,6 @@ GPT_CONFIG_124M = {
 torch.manual_seed(123)
 model = GPTModel(GPT_CONFIG_124M)
 model.eval()
-
-
-def text_to_token_ids(text, tokenizer):
-    encoded = tokenizer.encode(text, allowed_special={'<|endoftext|>'})
-    encoded_tensor = torch.tensor(encoded).unsqueeze(0) # Add batch dimension (1, seq_len)
-    return encoded_tensor
-
-def token_ids_to_text(token_ids, tokenizer):
-    flat = token_ids.squeeze(0).tolist() # Remove batch dimension and convert to list
-    text = tokenizer.decode(flat)
-    return text
 
 start_context = "Every effort moves you"
 tokenizer = tiktoken.get_encoding("gpt2")
@@ -183,3 +173,26 @@ with torch.no_grad():
 print(f"Train loss: {train_loss}")
 print(f"Validation loss: {val_loss}")
 print()
+
+print("***** Training the model *****")
+
+from training_functions import train_model_simple
+
+torch.manual_seed(123)
+model = GPTModel(GPT_CONFIG_124M)
+model.to(device)
+
+optimizer = torch.optim.AdamW(
+    model.parameters(), # All trainable weights
+    lr=0.0004, # Learning rate
+    weight_decay=0.1 # L2 regularization
+)
+
+num_epochs = 10
+train_losses, val_losses, track_tokens_seen = train_model_simple(
+    model, train_loader, val_loader, optimizer, device, num_epochs,
+    eval_freq=5, # Evaluate every 5 epochs
+    eval_iter=5, # Evaluate every 5 batches
+    start_context="Every effort moves you",
+    tokenizer=tokenizer
+)

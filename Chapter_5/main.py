@@ -3,6 +3,8 @@ import tiktoken
 import sys
 import os
 
+from plot import plot_losses
+
 # Add the parent directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -174,7 +176,7 @@ print(f"Train loss: {train_loss}")
 print(f"Validation loss: {val_loss}")
 print()
 
-print("***** Training the model *****")
+print("***** Training the model with simple training *****")
 
 from training_functions import train_model_simple
 
@@ -196,3 +198,10 @@ train_losses, val_losses, track_tokens_seen = train_model_simple(
     start_context="Every effort moves you",
     tokenizer=tokenizer
 )
+
+epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
+
+# We can see that the validation loss is higher than the training loss, which means that the model is overfitting
+# We can also see that the model is learning faster in the beginning
+# plot_losses(epochs_tensor, track_tokens_seen, train_losses, val_losses) # Uncomment to plot the losses
+    

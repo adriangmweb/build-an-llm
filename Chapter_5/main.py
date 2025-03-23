@@ -3,7 +3,8 @@ import tiktoken
 import sys
 import os
 
-from plot import plot_losses
+from temperature_scaling import generate
+from gpt_download import download_and_load_gpt2
 
 # Add the parent directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -163,7 +164,7 @@ for batch_idx, (inputs, targets) in enumerate(train_loader):
     print()
     break
 
-from training_functions import calculate_loss_loader
+from training_functions import calculate_loss_loader, load_weights_into_gpt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 model.to(device)
@@ -176,100 +177,49 @@ print(f"Train loss: {train_loss}")
 print(f"Validation loss: {val_loss}")
 print()
 
-print("***** Training the model with simple training *****")
+print("***** Training the model with simple training ***** \n")
+print("To see it in action, please run the script simple_training.py \n")
 
-from training_functions import train_model_simple
+print("***** Testing the model with GPT-2 weights ***** \n")
 
-torch.manual_seed(123)
-model = GPTModel(GPT_CONFIG_124M)
-model.to(device)
+# Load GPT-2 weights
+model_configs = {
+    "gpt2_small (124M)": {"embd_dim": 768, "n_layers": 12, "n_heads": 12},
+    "gpt2_medium (355M)": {"embd_dim": 1024, "n_layers": 24, "n_heads": 16},
+    "gpt2_large (760M)": {"embd_dim": 1280, "n_layers": 36, "n_heads": 20},
+    "gpt2_xl (137M)": {"embd_dim": 1600, "n_layers": 48, "n_heads": 25}
+}
 
-optimizer = torch.optim.AdamW(
-    model.parameters(), # All trainable weights
-    lr=0.0004, # Learning rate
-    weight_decay=0.1 # L2 regularization
+# load the smallest model
+model_size = "gpt2_small (124M)"
+NEW_MODEL_CONFIG = GPT_CONFIG_124M.copy()
+NEW_MODEL_CONFIG.update(model_configs[model_size])
+NEW_MODEL_CONFIG.update({"context_length": 1024})
+NEW_MODEL_CONFIG.update({"qkv_bias": True}) # Don't used in modern models but used in the original GPT-2 124M model
+
+settings, params = download_and_load_gpt2(
+    model_size="124M",
+    models_dir="gpt2"
 )
 
-num_epochs = 10
-train_losses, val_losses, track_tokens_seen = train_model_simple(
-    model, train_loader, val_loader, optimizer, device, num_epochs,
-    eval_freq=5, # Evaluate every 5 epochs
-    eval_iter=5, # Evaluate every 5 batches
-    start_context="Every effort moves you",
-    tokenizer=tokenizer
-)
+gpt2_small_model = GPTModel(NEW_MODEL_CONFIG)
+gpt2_small_model.eval()
 
-epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
+# Load the weights
+load_weights_into_gpt(gpt2_small_model, params)
+gpt2_small_model.to(device)
 
-# We can see that the validation loss is higher than the training loss, which means that the model is overfitting
-# We can also see that the model is learning faster in the beginning
-# plot_losses(epochs_tensor, track_tokens_seen, train_losses, val_losses) # Uncomment to plot the losses
-    
-model.to("cpu") # Move the model to the CPU as the dataset is too small
-model.eval()
-
-print("***** Temperature scaling ***** \n")
-
-model.to("cpu") # Move the model to the CPU as the dataset is too small
-model.eval()
-
-token_ids = generate_text_simple(
-    model,
-    idx=text_to_token_ids("every effort moves you", tokenizer),
-    max_new_tokens=25,
-    context_size=GPT_CONFIG_124M["context_length"]
-)
-
-print("No temperature scaling model output: \n")
-print(token_ids_to_text(token_ids, tokenizer))
-print()
-
-from temperature_scaling import generate
-
+# Test the model
 torch.manual_seed(123)
 token_ids = generate(
-    model,
-    idx=text_to_token_ids("every effort moves you", tokenizer),
-    max_new_tokens=15,
-    context_size=GPT_CONFIG_124M["context_length"],
-    top_k=25,
-    temperature=1.4
+    gpt2_small_model,
+    idx=text_to_token_ids("every effort moves you", tokenizer).to(device),
+    max_new_tokens=25,
+    context_size=NEW_MODEL_CONFIG["context_length"],
+    top_k=50,
+    temperature=1.5
 )
 
-print("Temperature scaled model output: \n")
+print("GPT-2 small model output: \n")
 print(token_ids_to_text(token_ids, tokenizer))
 print()
-
-print("***** Save and load a pretrained model ***** \n")
-
-torch.save(model.state_dict(), "model.pth")
-
-# Disabling to save the model architecture as well
-# loaded_model = GPTModel(GPT_CONFIG_124M)
-# loaded_model.load_state_dict(torch.load("model.pth"), map_location=device)
-# loaded_model.eval() # Set the model to evaluation mode to disable dropout as we want to disable any information from the training process
-
-# Save the model using torch.save will save the optimizer state as well
-# To save only the model parameters, we can use torch.save(model.state_dict(), "model.pth")
-# We want to save the AdamW optimizer state as well as it stores additional information
-# about the learning rate, weight decay, etc.
-
-torch.save(
-    {
-        "model_state_dict": model.state_dict(),
-        "optimizer_state_dict": optimizer.state_dict(),
-    },
-    "model_and_optimizer.pth"
-)
-
-checkpoint = torch.load("model_and_optimizer.pth", map_location=device)
-loaded_model = GPTModel(GPT_CONFIG_124M)
-loaded_model.load_state_dict(checkpoint["model_state_dict"])
-loaded_optimizer = torch.optim.AdamW(
-    loaded_model.parameters(),
-    lr=5e-4,
-    weight_decay=0.1
-)
-loaded_optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-
-# loaded_model.train() # Set the model to training mode to enable dropout as we want to use the model for training

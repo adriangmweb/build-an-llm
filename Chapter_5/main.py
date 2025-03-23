@@ -113,7 +113,10 @@ print()
 
 print("***** Loading the dataset *****")
 
-filepath = os.path.join(os.path.dirname(__file__), "..", "the-veredict.txt")
+# Get the absolute path to the project root directory
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+filepath = os.path.join(project_root, "the-veredict.txt")
+
 with open(filepath, "r", encoding="utf-8") as file:
     text_data = file.read()
 

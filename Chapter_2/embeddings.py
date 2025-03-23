@@ -1,9 +1,15 @@
 # Tokenize the text file
 import tiktoken
 import torch
+import os
+
+# Update the file path to use the same approach as main.py
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+filepath = os.path.join(project_root, "the-veredict.txt")
+
 tokenizer = tiktoken.get_encoding("gpt2")
 
-with open("the-veredict.txt", "r", encoding="utf-8") as file:
+with open(filepath, "r", encoding="utf-8") as file:
     raw_text = file.read()
 
 enc_text = tokenizer.encode(raw_text)

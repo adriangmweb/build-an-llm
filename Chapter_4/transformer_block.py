@@ -68,7 +68,7 @@ from Chapter_3.multi_head_attention import MultiHeadAttention
 class TransformerBlock(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.att = MultiHeadAttention(
+        self.attn = MultiHeadAttention(
             d_in=config["n_embd"],
             d_out=config["n_embd"],
             context_length=config["context_length"],
@@ -89,7 +89,7 @@ class TransformerBlock(nn.Module):
         # New transformer blocks use layer norm pre-attention
         # This is because it leads to better training stability
         x = self.norm1(x)
-        x = self.att(x)
+        x = self.attn(x)
         x = self.dropout(x)
         x = x + shortcut # Adds the original input back to the output
 

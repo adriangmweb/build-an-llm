@@ -12,3 +12,9 @@
 
 # ignore sms_spam_collection directory
 **/sms_spam_collection/
+
+# ignore all csv files
+*.csv
+
+# ignore venv directory
+**/.venv/

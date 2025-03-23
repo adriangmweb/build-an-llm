@@ -194,7 +194,7 @@ def classify_review(
     model.eval()
     
     input_ids = tokenizer.encode(text)
-    supported_context_length = model.pos_embd.weight.shape[1]
+    supported_context_length = model.pos_emb.weight.shape[1]
     
     input_ids = input_ids[:min( # Truncates sequence if too long
         max_length, supported_context_length

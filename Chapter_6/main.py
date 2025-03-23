@@ -286,7 +286,7 @@ print(f"Classification: {text_2_review}")
 print()
 
 # Save finetuned model
-torch.save(model.state_dict(), "review_classifier.pth.pth")
+torch.save(model.state_dict(), "review_classifier.pth")
 
 # Load finetuned model
 model_state_dict = torch.load("review_classifier.pth", map_location=device)

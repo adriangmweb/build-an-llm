@@ -1,0 +1,7 @@
+# ignore all files in the gpt2 directory
+gpt2/*
+
+# ignore all models files .pth
+*.pth
+
+

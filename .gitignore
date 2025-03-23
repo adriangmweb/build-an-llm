@@ -9,3 +9,6 @@
 
 # ignore tsv files
 *.tsv
+
+# ignore sms_spam_collection directory
+**/sms_spam_collection/

@@ -1,7 +1,9 @@
+import sys
+sys.path.append("..")  # Add parent directory to Python path
 import torch
 
 from Chapter_4.gpt2_models import generate_text_simple
-from text2tokens import text_to_token_ids, token_ids_to_text
+from Chapter_5.text2tokens import text_to_token_ids, token_ids_to_text
 
 # Calculate the loss for a single batch
 def calculate_loss_batch(input_batch, target_batch, model, device):

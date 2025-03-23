@@ -2,10 +2,12 @@ import torch
 import tiktoken
 import os
 import sys
+
+from text2tokens import text_to_token_ids, token_ids_to_text
 # Add the parent directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from Chapter_4.gpt2_models import GPTModel
+from Chapter_4.gpt2_models import GPTModel, generate_text_simple
 from training_functions import train_model_simple
 from Chapter_2.embeddings import create_dataloader_v1
 
@@ -88,3 +90,73 @@ epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
 # We can see that the validation loss is higher than the training loss, which means that the model is overfitting
 # We can also see that the model is learning faster in the beginning
 # plot_losses(epochs_tensor, track_tokens_seen, train_losses, val_losses) # Uncomment to plot the losses
+
+    
+model.to("cpu") # Move the model to the CPU as the dataset is too small
+model.eval()
+
+print("***** Temperature scaling ***** \n")
+
+model.to("cpu") # Move the model to the CPU as the dataset is too small
+model.eval()
+
+token_ids = generate_text_simple(
+    model,
+    idx=text_to_token_ids("every effort moves you", tokenizer),
+    max_new_tokens=25,
+    context_size=GPT_CONFIG_124M["context_length"]
+)
+
+print("No temperature scaling model output: \n")
+print(token_ids_to_text(token_ids, tokenizer))
+print()
+
+from temperature_scaling import generate
+
+torch.manual_seed(123)
+token_ids = generate(
+    model,
+    idx=text_to_token_ids("every effort moves you", tokenizer),
+    max_new_tokens=15,
+    context_size=GPT_CONFIG_124M["context_length"],
+    top_k=25,
+    temperature=1.4
+)
+
+print("Temperature scaled model output: \n")
+print(token_ids_to_text(token_ids, tokenizer))
+print()
+
+print("***** Save and load a pretrained model ***** \n")
+
+torch.save(model.state_dict(), "model.pth")
+
+# Disabling to save the model architecture as well
+# loaded_model = GPTModel(GPT_CONFIG_124M)
+# loaded_model.load_state_dict(torch.load("model.pth"), map_location=device)
+# loaded_model.eval() # Set the model to evaluation mode to disable dropout as we want to disable any information from the training process
+
+# Save the model using torch.save will save the optimizer state as well
+# To save only the model parameters, we can use torch.save(model.state_dict(), "model.pth")
+# We want to save the AdamW optimizer state as well as it stores additional information
+# about the learning rate, weight decay, etc.
+
+torch.save(
+    {
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+    },
+    "model_and_optimizer.pth"
+)
+
+checkpoint = torch.load("model_and_optimizer.pth", map_location=device)
+loaded_model = GPTModel(GPT_CONFIG_124M)
+loaded_model.load_state_dict(checkpoint["model_state_dict"])
+loaded_optimizer = torch.optim.AdamW(
+    loaded_model.parameters(),
+    lr=5e-4,
+    weight_decay=0.1
+)
+loaded_optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+
+# loaded_model.train() # Set the model to training mode to enable dropout as we want to use the model for training

@@ -18,3 +18,9 @@
 
 # ignore venv directory
 **/.venv/
+
+# ignore .DS_Store files
+.DS_Store
+
+# ignore pdf files
+*.pdf

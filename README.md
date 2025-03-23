@@ -40,7 +40,10 @@ build-an-llm/
 
 ## Usage
 
-Detailed usage instructions and examples will be added as the project progresses.
+To run the examples from each chapter:
+
+1. Navigate to the specific chapter directory
+2. Run the scripts for that chapter
 
 
 ## License

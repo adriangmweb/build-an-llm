@@ -4,4 +4,8 @@
 # ignore all models files .pth
 *.pth
 
+# ignore zip files
+*.zip
 
+# ignore tsv files
+*.tsv

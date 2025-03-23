@@ -43,9 +43,9 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         self.d_out_per_head = d_out // num_heads # Reduces the dim to match the desired output dim
 
-        self.W_Q = nn.Linear(d_in, d_out, bias=qvk_bias)
-        self.W_K = nn.Linear(d_in, d_out, bias=qvk_bias)
-        self.W_V = nn.Linear(d_in, d_out, bias=qvk_bias)
+        self.W_query = nn.Linear(d_in, d_out, bias=qvk_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qvk_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qvk_bias)
 
         self.out_proj = nn.Linear(d_out, d_out) # Combines the heads outputs
         self.dropout = nn.Dropout(dropout)
@@ -59,9 +59,9 @@ class MultiHeadAttention(nn.Module):
         b, num_tokens, d_in = x.shape
 
         # tensor shape: (b, num_tokens, d_out)  
-        keys = self.W_K(x)
-        queries = self.W_Q(x)
-        values = self.W_V(x)
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
 
         # Reshape the keys, queries, and values to add the num_heads dimension
         # This allows us to process each head in parallel 

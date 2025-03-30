@@ -24,3 +24,6 @@
 
 # ignore pdf files
 *.pdf
+
+# ignore instruction-data.json
+instruction-data.json

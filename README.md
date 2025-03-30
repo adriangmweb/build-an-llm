@@ -13,7 +13,9 @@ The project currently contains:
 - Chapter 2: Tokenization and embeddings
 - Chapter 3: Attention mechanisms and transformers
 - Chapter 4: Building a GPT model from scratch
-- Chapter 5: Training and fine-tuning LLMs
+- Chapter 5: Training LLMs
+- Chapter 6: Fine-tuning LLMs for text classification
+- Chapter 7: Fine-tuning LLMs to follow instructions
 
 ## Prerequisites
 
